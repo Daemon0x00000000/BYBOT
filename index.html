@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BYBOT</title>
+    <style>
+        * {
+        box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    body {
+        background-color: #000000;
+        color: #ffffff;
+    }
+    h1 {
+        color: #ffffff;
+    }
+    p {
+        color: #ffffff;
+    }
+
+    .container {
+        width: 50%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        transition: all 0.5s ease-out;
+    }
+
+    .container:hover {
+        transform: scale(1.05);
+        filter: blur(1px);
+    }
+
+    span {
+        color: #ffffff;
+    }
+    a {
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: bold;
+
+    }
+
+    a:hover {
+        color: #ffffff;
+        text-decoration: underline;
+
+    }
+
+    .back {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    .square {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #ffffff;
+        animation: animate 25s linear infinite;
+        transition: transform 0.5s ease-out;
+    }
+
+
+    @keyframes animate {
+
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+            border-radius: 0;
+        }
+
+        100% {
+            transform: translateY(1000px) rotate(720deg);
+            opacity: 0;
+            border-radius: 50%;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .container {
+            width: 100%;
+        }
+    }
+
+</style>
+</head>
+<body>
+<div class="back">
+</div>
+<div class="container">
+    <h1>BYBOT</h1>
+    <p>BYBOT is a <span style="color: #ff0000;">web hook</span> for my <span style="color: #ff0000;">strategy bot</span>.</p>
+    <span>Created by: <a href="#𝕯𝕬𝕰𝕸𝕺𝕹#8747">Daemon</a></span>
+</div>
+
+
+<script defer>
+    const back = document.querySelector('.back');
+    const SQUARES_COUNT = 128;
+    const COLORS = [
+        '#ffffff',
+        '#ff0000',
+        '#00ff00',
+        '#0000ff',
+        '#ffff00',
+        '#00ffff',
+        '#ff00ff',
+        '#ff8000',
+        '#ff0080',
+        '#8000ff',
+        '#0080ff',
+        '#00ff80',
+        ];
+
+    const SQUARE_SPEED = 0.2;
+    const initSquares = () => {
+        for (let i = 0; i < SQUARES_COUNT; i++) {
+            const square = document.createElement('div');
+            square.classList.add('square');
+            square.style.width = `${Math.random() * 50}px`;
+            square.style.height = square.style.width;
+            square.style.left = `${Math.random() * 100}%`;
+            square.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+            square.style.opacity = `0`;
+            square.style.animationDelay = `${Math.random() * 2}s`;
+            square.style.animationDuration = `${Math.random() * 10 + SQUARE_SPEED}s`;
+            square.style.animationTimingFunction = 'cubic-bezier(0, 0.5, 0.5, 1)';
+
+            back.appendChild(square);
+        }
+    }
+    initSquares();
+    </script>
+</body>
+</html>
