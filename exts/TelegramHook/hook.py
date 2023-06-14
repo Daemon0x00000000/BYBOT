@@ -32,3 +32,6 @@ class TelegramHook:
 
     async def sendInfo(self, message):
         await self.sendPrefixedMessage(message, '\U00002139 [Info]')
+
+    async def refresh(self):
+        await self.bot.initialize()

@@ -118,3 +118,7 @@ class BybitHook:
             await self.tHook.sendSuccess(message)
         elif status == 'error':
             await self.tHook.sendError(message)
+
+    @catch_and_alert('Unable to refresh telegram')
+    async def refresh_telegram(self):
+        await self.tHook.refresh()
