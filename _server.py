@@ -70,7 +70,7 @@ def index():
 
 
 @app.route('/stra', methods=['POST'])
-def order():
+async def order():
     load_dotenv()
     try:
         position = json.loads(request.data)['Position']
@@ -94,15 +94,17 @@ def order():
     try:
         currentTimestamp = str(time.time())
         currentInstance = instancesManager.getInstance(straname)
+        await currentInstance.refresh_telegram()
         if position == 'long':
-            currentInstance.close_order()
-            currentInstance.place_order('Buy')
+            await currentInstance.close_order()
+            await currentInstance.place_order('Buy')
         elif position == 'short':
-            currentInstance.close_order()
-            currentInstance.place_order('Sell')
+            await currentInstance.close_order()
+            await currentInstance.place_order('Sell')
         elif position == 'flat' and (float(currentTimestamp) - float(get_timestamp(straname))) > 30:
-            currentInstance.close_order()
+            await currentInstance.close_order()
         append_timestamp(currentTimestamp, straname)
         return response(200)
-    except Exception:
+    except Exception as e:
+        print(e)
         return response(500)
