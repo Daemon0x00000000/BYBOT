@@ -5,6 +5,23 @@ from pybit.exceptions import FailedRequestError, InvalidRequestError
 import time
 
 
+def catch_and_alert(error_message, exception=(Exception,), callback=None) -> callable:
+    def decorator(func):
+        async def wrapper(self, *args, **kwargs):
+            try:
+                return await func(self, *args, **kwargs)
+            except exception as e:
+                if callback is not None:
+                    callback(e)
+                else:
+                    asyncio.run(self.sendMessage(f'{error_message} : {e}', 'error'))
+                return None
+
+        return wrapper
+
+    return decorator
+
+
 class BybitHook:
     def __init__(self, key, secret, telegramCallback, priceCallback, name, asset):
         api_key = key
@@ -46,13 +63,10 @@ class BybitHook:
         if self.currentPosition == '':
             self.available_balance = data['data'][0]['available_balance']
 
-    def get_balance(self):
-        try:
-            result = self.client.get_wallet_balance()
-            return result['result']['USDT']['available_balance']
-        except (FailedRequestError, InvalidRequestError) as e:
-            asyncio.run(self.sendMessage(f"Unable to get balance : {e.message}", 'error'))
-            return None
+    @catch_and_alert('Unable to get balance', (FailedRequestError, InvalidRequestError))
+    async def get_balance(self):
+        result = await asyncio.to_thread(self.client.get_wallet_balance)
+        return result['result']['USDT']['available_balance']
 
     def place_order(self, side) -> None:
         retries = 0
@@ -84,20 +98,17 @@ class BybitHook:
                 if retries >= 3:
                     asyncio.run(self.sendMessage(f"Unable to place order : {e.message}", 'error'))
 
-    def close_order(self):
-        try:
-            self.client.close_position(self.asset)
-            # self.client.cancel_all_active_orders(symbol=symbol)
-            asyncio.run(self.sendMessage(f'Atempting to close order : {self.asset}', 'info'))
-            timestamp = time.time()
-            while self.currentPosition != '':
-                if time.time() - timestamp > 5:
-                    break
-                pass
-            asyncio.run(self.sendMessage(f'Order closed : {self.asset}', 'success'))
-        except Exception as e:
-            asyncio.run(self.sendMessage(f"Unable to close order : {e}", 'error'))
-            return None
+    @catch_and_alert('Unable to close order')
+    async def close_order(self):
+        self.client.close_position(self.asset)
+        # self.client.cancel_all_active_orders(symbol=symbol)
+        await self.sendMessage(f'Atempting to close order : {self.asset}', 'info')
+        timestamp = time.time()
+        while self.currentPosition != '':
+            if time.time() - timestamp > 5:
+                break
+            pass
+        await self.sendMessage(f'Order closed : {self.asset}', 'success')
 
     async def sendMessage(self, message, status):
         message = f'{self.name} : {message}'
