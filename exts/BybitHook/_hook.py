@@ -68,12 +68,12 @@ class BybitHook:
         result = await asyncio.to_thread(self.client.get_wallet_balance)
         return result['result']['USDT']['available_balance']
 
-    def place_order(self, side) -> None:
+    async def place_order(self, side) -> None:
         retries = 0
         asset = self.asset
         while retries <= 3:
             try:
-                balance = self.available_balance
+                balance = await self.available_balance
                 if balance is None:
                     return
                 solusdtperp = self.getPrice()
@@ -81,7 +81,7 @@ class BybitHook:
                     return
                 qty = str(float(balance * 0.99) / float(solusdtperp))[:7]
 
-                asyncio.run(self.sendMessage(f'Atempting to place order : {side} {qty} {asset}', 'info'))
+                await self.sendMessage(f'Atempting to place order : {side} {qty} {asset}', 'info')
                 self.client.place_active_order(symbol=asset, qty=qty, side=side, order_type="Market",
                                                time_in_force="GoodTillCancel", reduce_only=False,
                                                close_on_trigger=False)
@@ -90,13 +90,13 @@ class BybitHook:
                     if time.time() - timestamp > 5:
                         break
                     pass
-                asyncio.run(self.sendMessage(f'Order placed : {side} {qty} {asset}', 'success'))
+                await self.sendMessage(f'Order placed : {side} {qty} {asset}', 'success')
                 break
             except (FailedRequestError, InvalidRequestError) as e:
                 retries += 1
-                asyncio.run(self.sendMessage(f"Attempt {retries} : Unable to place order : {e.message}", 'error'))
+                await self.sendMessage(f"Attempt {retries} : Unable to place order : {e.message}", 'error')
                 if retries >= 3:
-                    asyncio.run(self.sendMessage(f"Unable to place order : {e.message}", 'error'))
+                    await self.sendMessage(f"Unable to place order : {e.message}", 'error')
 
     @catch_and_alert('Unable to close order')
     async def close_order(self):
