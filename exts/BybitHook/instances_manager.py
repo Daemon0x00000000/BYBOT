@@ -19,8 +19,8 @@ class InstancesManager:
         tHook = TelegramHook(tTOKEN, tCHAT_ID)
         for strategy in strategies:
             self.instances[strategy] = BybitHook(jsonConfig[strategy]["API_KEY"], jsonConfig[strategy]["API_SECRET"],
-                                                tHook,
-                                                lambda: self.assetPrice, strategy, asset)
+                                                 tHook,
+                                                 lambda: self.assetPrice, strategy, asset)
 
         self.ws = WebSocket(api_key='', api_secret='', retries=35, test=False)
         self.assetPrice = 0.0
